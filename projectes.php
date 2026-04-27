@@ -178,6 +178,11 @@ $projects = fetchAll("
                                             <?php endif; ?>
                                         </td>
                                         <td>
+                                            <a href="report_projecte.php?id=<?php echo $project['id']; ?>" 
+                                               class="btn btn-primary" 
+                                               style="padding: 0.25rem 0.5rem; font-size: 0.85rem; margin-right: 0.25rem;">
+                                                Report
+                                            </a>
                                             <?php if ($project['estat'] === 'actiu'): ?>
                                                 <form method="POST" style="display: inline;">
                                                     <input type="hidden" name="csrf_token" value="<?php echo e($csrf_token); ?>">
