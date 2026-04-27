@@ -182,436 +182,509 @@ $flash = getFlashMessage();
     <title>StaffLog - Dashboard Administrador</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .llista-vermella {
-            background: linear-gradient(135deg, #fff5f5, #ffe0e0);
-            border: 2px solid #e74c3c;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .llista-vermella h3 {
-            color: #c0392b;
-            margin: 0 0 1rem 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .llista-vermella table {
-            box-shadow: none;
-        }
-        .llista-vermella table thead {
-            background: #e74c3c;
-        }
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        .status-card {
-            background: white;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            text-align: center;
-            border-left: 4px solid #ccc;
-        }
-        .status-card.clocked-in {
-            border-left-color: var(--success-color);
-        }
-        .status-card.not-clocked {
-            border-left-color: var(--danger-color);
-        }
-        .status-card .employee-name {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--primary-color);
-        }
-        .status-card .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-        .status-card .status-badge.online {
-            background: #d4edda;
-            color: #155724;
-        }
-        .status-card .status-badge.offline {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        .status-card .project-name {
-            font-size: 0.85rem;
-            color: #666;
-        }
-        .status-card .clock-time {
-            font-size: 0.75rem;
-            color: #999;
-            margin-top: 0.25rem;
-        }
-        .chart-container {
-            position: relative;
-            height: 250px;
-            margin-top: 1rem;
-        }
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        .full-width-card {
-            grid-column: 1 / -1;
-        }
-    </style>
 </head>
 <body>
-    <header class="header">
-        <div class="container">
-            <h1>StaffLog - Admin</h1>
+    <div class="admin-layout">
+        <!-- Top Header -->
+        <header class="header">
+            <div class="d-flex align-center gap-2">
+                <button class="hamburger" aria-label="Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <h1>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                        <line x1="9" y1="21" x2="9" y2="9"></line>
+                    </svg>
+                    StaffLog Admin
+                </h1>
+            </div>
             <nav>
-                <span>Benvingut/da, <?php echo e($userName); ?></span>
+                <span><?php echo e($userName); ?></span>
                 <a href="dashboard_employee.php">Veure Com Empleado</a>
                 <a href="logout.php">Tancar Sessió</a>
             </nav>
-        </div>
-    </header>
+        </header>
 
-    <main class="container">
-        <?php if ($flash): ?>
-            <div class="alert alert-<?php echo e($flash['type']); ?>">
-                <?php echo e($flash['message']); ?>
-            </div>
-        <?php endif; ?>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav>
+                <div class="nav-section">Principal</div>
+                <ul class="sidebar-nav">
+                    <li>
+                        <a href="dashboard_admin.php" class="active">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            Dashboard
+                        </a>
+                    </li>
+                </ul>
 
-        <!-- Statistics Cards -->
-        <div class="dashboard-grid">
-            <div class="stat-card">
-                <div class="stat-number"><?php echo $stats['active_employees']; ?></div>
-                <div class="stat-label">Empleats Actius</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-number"><?php echo $stats['active_projects']; ?></div>
-                <div class="stat-label">Projectes Actius</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-number"><?php echo number_format($stats['total_hours_this_month'], 1); ?>h</div>
-                <div class="stat-label">Hores Aquest Mes</div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-number"><?php echo $stats['admins']; ?></div>
-                <div class="stat-label">Administradors</div>
-            </div>
-        </div>
+                <div class="nav-section">Gestió</div>
+                <ul class="sidebar-nav">
+                    <li>
+                        <a href="empleats.php">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            Empleats
+                        </a>
+                    </li>
+                    <li>
+                        <a href="projectes.php">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            Projectes
+                        </a>
+                    </li>
+                    <li>
+                        <a href="alertes.php">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            Alertes
+                            <?php 
+                            $unreadAlerts = fetchOne("SELECT COUNT(*) as count FROM alerts WHERE llegida = 0");
+                            if ($unreadAlerts['count'] > 0): ?>
+                                <span class="badge badge-danger" style="margin-left: auto;"><?php echo $unreadAlerts['count']; ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </li>
+                </ul>
 
-        <!-- LLISTA VERMELLA Section -->
-        <?php if (!empty($llistaVermella)): ?>
-        <div class="llista-vermella">
-            <h3>
-                <span>⚠️</span>
-                Llista Vermella - Empleats per sota d'hores contractades avui
-            </h3>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Hores Contractades</th>
-                            <th>Hores Fetes Avui</th>
-                            <th>Falten</th>
-                            <th>% Completat</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($llistaVermella as $emp): ?>
+                <div class="nav-section">Compte</div>
+                <ul class="sidebar-nav">
+                    <li>
+                        <a href="logout.php">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            Tancar Sessió
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <?php if ($flash): ?>
+                <div class="alert alert-<?php echo e($flash['type']); ?> fade-in">
+                    <?php if ($flash['type'] === 'success'): ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    <?php elseif ($flash['type'] === 'error'): ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                    <?php endif; ?>
+                    <?php echo e($flash['message']); ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Statistics Cards -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-number"><?php echo $stats['active_employees']; ?></div>
+                    <div class="stat-label">Empleats Actius</div>
+                </div>
+                
+                <div class="stat-card success">
+                    <div class="stat-number"><?php echo $stats['active_projects']; ?></div>
+                    <div class="stat-label">Projectes Actius</div>
+                </div>
+                
+                <div class="stat-card warning">
+                    <div class="stat-number"><?php echo number_format($stats['total_hours_this_month'], 1); ?>h</div>
+                    <div class="stat-label">Hores Aquest Mes</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number"><?php echo $stats['admins']; ?></div>
+                    <div class="stat-label">Administradors</div>
+                </div>
+            </div>
+
+            <!-- LLISTA VERMELLA Section -->
+            <?php if (!empty($llistaVermella)): ?>
+            <div class="llista-vermella fade-in">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    Llista Vermella - Empleats per sota d'hores contractades avui
+                </h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
                             <tr>
-                                <td><?php echo e($emp['nom']); ?></td>
-                                <td><?php echo number_format($emp['hores_contractades'], 2); ?>h</td>
-                                <td><?php echo number_format($emp['hores_fetes'], 2); ?>h</td>
-                                <td style="color: #e74c3c; font-weight: 600;">
-                                    <?php echo number_format($emp['hores_falten'], 2); ?>h
-                                </td>
-                                <td>
-                                    <?php 
-                                    $percent = ($emp['hores_contractades'] > 0) 
-                                        ? ($emp['hores_fetes'] / $emp['hores_contractades']) * 100 
-                                        : 0;
-                                    ?>
-                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                        <div style="width: 80px; height: 8px; background: #eee; border-radius: 4px; overflow: hidden;">
-                                            <div style="width: <?php echo $percent; ?>%; height: 100%; background: <?php echo $percent < 50 ? '#e74c3c' : '#f39c12'; ?>; border-radius: 4px;"></div>
-                                        </div>
-                                        <span><?php echo number_format($percent, 0); ?>%</span>
-                                    </div>
-                                </td>
+                                <th>Nom</th>
+                                <th>Hores Contractades</th>
+                                <th>Hores Fetes Avui</th>
+                                <th>Falten</th>
+                                <th>% Completat</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($llistaVermella as $emp): ?>
+                                <tr>
+                                    <td><strong><?php echo e($emp['nom']); ?></strong></td>
+                                    <td><?php echo number_format($emp['hores_contractades'], 2); ?>h</td>
+                                    <td><?php echo number_format($emp['hores_fetes'], 2); ?>h</td>
+                                    <td style="color: var(--danger); font-weight: 600;">
+                                        <?php echo number_format($emp['hores_falten'], 2); ?>h
+                                    </td>
+                                    <td>
+                                        <?php 
+                                        $percent = ($emp['hores_contractades'] > 0) 
+                                            ? ($emp['hores_fetes'] / $emp['hores_contractades']) * 100 
+                                            : 0;
+                                        ?>
+                                        <div class="d-flex align-center gap-1">
+                                            <div class="progress-bar" style="width: 80px;">
+                                                <div class="progress-fill" style="width: <?php echo $percent; ?>%; background: <?php echo $percent < 50 ? 'var(--danger)' : 'var(--warning)'; ?>;"></div>
+                                            </div>
+                                            <span style="font-size: 0.8125rem;"><?php echo number_format($percent, 0); ?>%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-        <?php endif; ?>
+            <?php endif; ?>
 
-        <!-- Real-time Employee Status Grid -->
-        <div class="card full-width-card">
-            <div class="section-title">
-                <h3 style="margin: 0;">📡 Estat dels Empleats en Temps Real</h3>
-            </div>
-            <div class="status-grid">
-                <?php foreach ($employeeStatus as $emp): ?>
-                    <div class="status-card <?php echo $emp['is_clocked_in'] ? 'clocked-in' : 'not-clocked'; ?>">
-                        <div class="employee-name"><?php echo e($emp['nom']); ?></div>
-                        <?php if ($emp['is_clocked_in']): ?>
-                            <span class="status-badge online">● Connectat</span>
-                            <div class="project-name">
-                                <?php echo $emp['current_project'] ? e($emp['current_project']) : 'Sense projecte'; ?>
-                            </div>
-                            <div class="clock-time">
-                                Des de: <?php echo $emp['clock_in_time'] ? date('H:i', strtotime($emp['clock_in_time'])) : '-'; ?>
-                            </div>
-                        <?php else: ?>
-                            <span class="status-badge offline">○ Desconnectat</span>
-                            <div class="project-name">-</div>
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-
-        <!-- Weekly Project Hours Chart -->
-        <div class="card full-width-card">
-            <div class="section-title">
-                <h3 style="margin: 0;">📊 Hores per Projecte Aquesta Setmana</h3>
-            </div>
-            <div class="chart-container">
-                <canvas id="projectChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Employees and Projects Section -->
-        <div class="dashboard-grid" style="margin-top: 2rem;">
-            <!-- Employees List -->
+            <!-- Real-time Employee Status Grid -->
             <div class="card">
                 <div class="card-header">
-                    <h3>Empleats</h3>
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                        </svg>
+                        Estat dels Empleats en Temps Real
+                    </h3>
                 </div>
-                
-                <?php if (empty($employees)): ?>
-                    <p>No hi ha empleats registrats.</p>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nom</th>
-                                    <th>Email</th>
-                                    <th>Hores Mes</th>
-                                    <th>Estat</th>
-                                    <th>Accions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($employees as $employee): ?>
+                <div class="status-grid">
+                    <?php foreach ($employeeStatus as $emp): ?>
+                        <div class="status-card <?php echo $emp['is_clocked_in'] ? 'online' : 'offline'; ?>">
+                            <div class="employee-name"><?php echo e($emp['nom']); ?></div>
+                            <?php if ($emp['is_clocked_in']): ?>
+                                <span class="status-indicator online">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+                                    Connectat
+                                </span>
+                                <div class="project-name">
+                                    <?php echo $emp['current_project'] ? e($emp['current_project']) : 'Sense projecte'; ?>
+                                </div>
+                                <div class="clock-time">
+                                    Des de: <?php echo $emp['clock_in_time'] ? date('H:i', strtotime($emp['clock_in_time'])) : '-'; ?>
+                                </div>
+                            <?php else: ?>
+                                <span class="status-indicator offline">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+                                    Desconnectat
+                                </span>
+                                <div class="project-name">-</div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <!-- Weekly Project Hours Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                        Hores per Projecte Aquesta Setmana
+                    </h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="projectChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Employees and Projects Section -->
+            <div class="dashboard-grid" style="margin-top: 2rem;">
+                <!-- Employees List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            Empleats
+                        </h3>
+                    </div>
+                    
+                    <?php if (empty($employees)): ?>
+                        <p class="text-muted">No hi ha empleats registrats.</p>
+                    <?php else: ?>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
                                     <tr>
-                                        <td><?php echo e($employee['nom']); ?></td>
-                                        <td><?php echo e($employee['email']); ?></td>
-                                        <td><?php echo number_format($employee['hours_this_month'], 2); ?>h</td>
-                                        <td>
-                                            <?php if ($employee['actiu']): ?>
-                                                <span class="badge badge-success">Actiu</span>
-                                            <?php else: ?>
-                                                <span class="badge badge-danger">Inactiu</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php if ($employee['actiu']): ?>
+                                        <th>Nom</th>
+                                        <th>Email</th>
+                                        <th>Hores Mes</th>
+                                        <th>Estat</th>
+                                        <th>Accions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($employees as $employee): ?>
+                                        <tr>
+                                            <td><strong><?php echo e($employee['nom']); ?></strong></td>
+                                            <td class="text-muted"><?php echo e($employee['email']); ?></td>
+                                            <td><?php echo number_format($employee['hours_this_month'], 2); ?>h</td>
+                                            <td>
+                                                <?php if ($employee['actiu']): ?>
+                                                    <span class="badge badge-success">Actiu</span>
+                                                <?php else: ?>
+                                                    <span class="badge badge-danger">Inactiu</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if ($employee['actiu']): ?>
+                                                    <form method="POST" style="display: inline;">
+                                                        <input type="hidden" name="action" value="deactivate_user">
+                                                        <input type="hidden" name="user_id" value="<?php echo $employee['id']; ?>">
+                                                        <input type="hidden" name="csrf_token" value="<?php echo e($csrf_token); ?>">
+                                                        <button type="submit" class="btn btn-danger btn-sm" 
+                                                                data-confirm="Segur que vols desactivar aquest usuari?">
+                                                            Desactivar
+                                                        </button>
+                                                    </form>
+                                                <?php else: ?>
+                                                    <form method="POST" style="display: inline;">
+                                                        <input type="hidden" name="action" value="activate_user">
+                                                        <input type="hidden" name="user_id" value="<?php echo $employee['id']; ?>">
+                                                        <input type="hidden" name="csrf_token" value="<?php echo e($csrf_token); ?>">
+                                                        <button type="submit" class="btn btn-success btn-sm">
+                                                            Activar
+                                                        </button>
+                                                    </form>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Projects List -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            Projectes
+                        </h3>
+                    </div>
+                    
+                    <?php if (empty($projects)): ?>
+                        <p class="text-muted">No hi ha projectes registrats.</p>
+                    <?php else: ?>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Client</th>
+                                        <th>Hores Pressupostades</th>
+                                        <th>Hores Registrades</th>
+                                        <th>Estat</th>
+                                        <th>Report</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($projects as $project): ?>
+                                        <tr>
+                                            <td><strong><?php echo e($project['nom']); ?></strong></td>
+                                            <td class="text-muted"><?php echo e($project['client'] ?? '-'); ?></td>
+                                            <td><?php echo number_format($project['hores_pressupostades'], 2); ?>h</td>
+                                            <td><?php echo number_format($project['hours_logged'], 2); ?>h</td>
+                                            <td>
+                                                <?php if ($project['estat'] === 'actiu'): ?>
+                                                    <span class="badge badge-success">Actiu</span>
+                                                <?php else: ?>
+                                                    <span class="badge badge-danger">Tancat</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <a href="report_projecte.php?id=<?php echo $project['id']; ?>" class="btn btn-primary btn-sm">
+                                                    Veure
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Recent Entries and Alerts -->
+            <div class="dashboard-grid" style="margin-top: 1.5rem;">
+                <!-- Recent Time Entries -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            Registres Recents
+                        </h3>
+                    </div>
+                    
+                    <?php if (empty($recentEntries)): ?>
+                        <p class="text-muted">No hi ha registres recents.</p>
+                    <?php else: ?>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Usuari</th>
+                                        <th>Projecte</th>
+                                        <th>Entrada</th>
+                                        <th>Sortida</th>
+                                        <th>Hores</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($recentEntries as $entry): ?>
+                                        <tr>
+                                            <td><strong><?php echo e($entry['user_name']); ?></strong></td>
+                                            <td><?php echo e($entry['project_name']); ?></td>
+                                            <td><?php echo date('d/m/Y H:i', strtotime($entry['entrada'])); ?></td>
+                                            <td>
+                                                <?php if ($entry['sortida']): ?>
+                                                    <?php echo date('d/m/Y H:i', strtotime($entry['sortida'])); ?>
+                                                <?php else: ?>
+                                                    <span class="badge badge-success">En curs</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if ($entry['hores_totals']): ?>
+                                                    <?php echo number_format($entry['hores_totals'], 2); ?>h
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Alerts -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            Alertes Pendents
+                        </h3>
+                    </div>
+                    
+                    <?php if (empty($alerts)): ?>
+                        <p class="text-muted text-center" style="padding: 2rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 0.5rem;">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <br>No hi ha alertes pendents.
+                        </p>
+                    <?php else: ?>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Usuari</th>
+                                        <th>Tipus</th>
+                                        <th>Data</th>
+                                        <th>Acció</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($alerts as $alert): ?>
+                                        <tr>
+                                            <td><strong><?php echo e($alert['user_name']); ?></strong></td>
+                                            <td>
+                                                <?php
+                                                $tipusLabels = [
+                                                    'absencia' => 'Absència',
+                                                    'retard' => 'Retard',
+                                                    'sortida_aviat' => 'Sortida Aviat'
+                                                ];
+                                                $badgeClass = 'badge-info';
+                                                if ($alert['tipus'] === 'absencia') $badgeClass = 'badge-danger';
+                                                elseif ($alert['tipus'] === 'retard') $badgeClass = 'badge-warning';
+                                                ?>
+                                                <span class="badge <?php echo $badgeClass; ?>">
+                                                    <?php echo $tipusLabels[$alert['tipus']] ?? $alert['tipus']; ?>
+                                                </span>
+                                            </td>
+                                            <td><?php echo date('d/m/Y', strtotime($alert['data'])); ?></td>
+                                            <td>
                                                 <form method="POST" style="display: inline;">
-                                                    <input type="hidden" name="action" value="deactivate_user">
-                                                    <input type="hidden" name="user_id" value="<?php echo $employee['id']; ?>">
+                                                    <input type="hidden" name="action" value="mark_alert_read">
+                                                    <input type="hidden" name="alert_id" value="<?php echo $alert['id']; ?>">
                                                     <input type="hidden" name="csrf_token" value="<?php echo e($csrf_token); ?>">
-                                                    <button type="submit" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;" 
-                                                            data-confirm="Segur que vols desactivar aquest usuari?">
-                                                        Desactivar
+                                                    <button type="submit" class="btn btn-primary btn-sm">
+                                                        Marcar com Llegida
                                                     </button>
                                                 </form>
-                                            <?php else: ?>
-                                                <form method="POST" style="display: inline;">
-                                                    <input type="hidden" name="action" value="activate_user">
-                                                    <input type="hidden" name="user_id" value="<?php echo $employee['id']; ?>">
-                                                    <input type="hidden" name="csrf_token" value="<?php echo e($csrf_token); ?>">
-                                                    <button type="submit" class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;">
-                                                        Activar
-                                                    </button>
-                                                </form>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Projects List -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>Projectes</h3>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
                 </div>
-                
-                <?php if (empty($projects)): ?>
-                    <p>No hi ha projectes registrats.</p>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nom</th>
-                                    <th>Client</th>
-                                    <th>Hores Pressupostades</th>
-                                    <th>Hores Registrades</th>
-                                    <th>Estat</th>
-                                    <th>Report</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($projects as $project): ?>
-                                    <tr>
-                                        <td><?php echo e($project['nom']); ?></td>
-                                        <td><?php echo e($project['client'] ?? '-'); ?></td>
-                                        <td><?php echo number_format($project['hores_pressupostades'], 2); ?>h</td>
-                                        <td><?php echo number_format($project['hours_logged'], 2); ?>h</td>
-                                        <td>
-                                            <?php if ($project['estat'] === 'actiu'): ?>
-                                                <span class="badge badge-success">Actiu</span>
-                                            <?php else: ?>
-                                                <span class="badge badge-danger">Tancat</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <a href="report_projecte.php?id=<?php echo $project['id']; ?>" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;">
-                                                Veure
-                                            </a>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
             </div>
-        </div>
-
-        <!-- Recent Entries and Alerts -->
-        <div class="dashboard-grid" style="margin-top: 1.5rem;">
-            <!-- Recent Time Entries -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>Registres Recents</h3>
-                </div>
-                
-                <?php if (empty($recentEntries)): ?>
-                    <p>No hi ha registres recents.</p>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Usuari</th>
-                                    <th>Projecte</th>
-                                    <th>Entrada</th>
-                                    <th>Sortida</th>
-                                    <th>Hores</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($recentEntries as $entry): ?>
-                                    <tr>
-                                        <td><?php echo e($entry['user_name']); ?></td>
-                                        <td><?php echo e($entry['project_name']); ?></td>
-                                        <td><?php echo date('d/m/Y H:i', strtotime($entry['entrada'])); ?></td>
-                                        <td>
-                                            <?php if ($entry['sortida']): ?>
-                                                <?php echo date('d/m/Y H:i', strtotime($entry['sortida'])); ?>
-                                            <?php else: ?>
-                                                <span class="badge badge-success">En curs</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php if ($entry['hores_totals']): ?>
-                                                <?php echo number_format($entry['hores_totals'], 2); ?>h
-                                            <?php else: ?>
-                                                -
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Alerts -->
-            <div class="card">
-                <div class="card-header">
-                    <h3>Alertes Pendents</h3>
-                </div>
-                
-                <?php if (empty($alerts)): ?>
-                    <p>No hi ha alertes pendents.</p>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Usuari</th>
-                                    <th>Tipus</th>
-                                    <th>Data</th>
-                                    <th>Acció</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($alerts as $alert): ?>
-                                    <tr>
-                                        <td><?php echo e($alert['user_name']); ?></td>
-                                        <td>
-                                            <?php
-                                            $tipusLabels = [
-                                                'absencia' => 'Absència',
-                                                'retard' => 'Retard',
-                                                'sortida_aviat' => 'Sortida Aviat'
-                                            ];
-                                            echo $tipusLabels[$alert['tipus']] ?? $alert['tipus'];
-                                            ?>
-                                        </td>
-                                        <td><?php echo date('d/m/Y', strtotime($alert['data'])); ?></td>
-                                        <td>
-                                            <form method="POST" style="display: inline;">
-                                                <input type="hidden" name="action" value="mark_alert_read">
-                                                <input type="hidden" name="alert_id" value="<?php echo $alert['id']; ?>">
-                                                <input type="hidden" name="csrf_token" value="<?php echo e($csrf_token); ?>">
-                                                <button type="submit" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.85rem;">
-                                                    Marcar com Llegida
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </main>
+        </main>
+    </div>
 
     <footer class="footer">
         <div class="container">
@@ -632,34 +705,50 @@ $flash = getFlashMessage();
                     datasets: [{
                         label: 'Hores treballades',
                         data: <?php echo json_encode($chartProjectData); ?>,
-                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
-                        borderColor: 'rgba(52, 152, 219, 1)',
-                        borderWidth: 1
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 0,
+                        borderRadius: 6
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     indexAxis: 'y',
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return value + 'h';
-                                }
-                            }
-                        }
-                    },
                     plugins: {
                         legend: {
                             display: false
                         },
                         tooltip: {
+                            backgroundColor: '#1E293B',
+                            titleFont: { family: "'Inter', sans-serif", size: 13 },
+                            bodyFont: { family: "'Inter', sans-serif", size: 12 },
+                            padding: 12,
+                            cornerRadius: 8,
                             callbacks: {
                                 label: function(context) {
                                     return context.raw + ' hores';
                                 }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: '#E2E8F0', drawBorder: false },
+                            ticks: {
+                                font: { family: "'Inter', sans-serif", size: 11 },
+                                color: '#64748B',
+                                callback: function(value) {
+                                    return value + 'h';
+                                }
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: "'Inter', sans-serif", size: 11 },
+                                color: '#1E293B'
                             }
                         }
                     }
