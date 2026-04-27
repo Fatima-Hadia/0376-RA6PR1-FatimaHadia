@@ -1,7 +1,7 @@
 <?php
 /**
  * StaffLog - Login Page
- * Handles user authentication with secure session management.
+ * Handles user authentication.
  */
 
 // Start session and load required files
@@ -23,11 +23,6 @@ if (isLoggedIn()) {
 $error = '';
 $email = '';
 
-// Get email from cookie if exists (for pre-filling)
-if (isset($_COOKIE['last_email'])) {
-    $email = $_COOKIE['last_email'];
-}
-
 // Process login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
@@ -40,51 +35,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (empty($email) || empty($password)) {
         $error = 'Si us plau, ompli tots els camps.';
     } else {
-        // Validate email format using filter_var with FILTER_VALIDATE_EMAIL
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $error = 'Format de correu electrònic no vàlid.';
-        } else {
-            try {
-                // Find user by email using prepared statement with ? placeholder
-                $stmt = executeQuery(
-                    "SELECT id, nom, email, password_hash, rol, actiu 
-                     FROM users 
-                     WHERE email = ?",
-                    [$email]
-                );
-                $user = $stmt->fetch();
-                
-                if ($user && password_verify($password, $user['password_hash'])) {
-                    // Check if user is active
-                    if ($user['actiu'] == 1) {
-                        // Login successful
-                        loginUser($user);
-                        
-                        // Set cookie for last_email (7 day expiry)
-                        // NEVER store password in cookie
-                        setcookie('last_email', $email, time() + (7 * 24 * 60 * 60), '/');
-                        
-                        // Set flash message
-                        setFlashMessage('success', 'Benvingut/da, ' . e($user['nom']) . '!');
-                        
-                        // Redirect to appropriate dashboard
-                        if ($user['rol'] === 'admin') {
-                            header('Location: dashboard_admin.php');
-                        } else {
-                            header('Location: dashboard_employee.php');
-                        }
-                        exit;
+        try {
+            // Find user by email
+            $user = fetchOne(
+                "SELECT id, nom, email, password_hash, rol, actiu 
+                 FROM users 
+                 WHERE email = :email",
+                ['email' => $email]
+            );
+            
+            if ($user && password_verify($password, $user['password_hash'])) {
+                // Check if user is active
+                if ($user['actiu'] == 1) {
+                    // Login successful
+                    loginUser($user);
+                    
+                    // Set flash message
+                    setFlashMessage('success', 'Benvingut/da, ' . e($user['nom']) . '!');
+                    
+                    // Redirect to appropriate dashboard
+                    if ($user['rol'] === 'admin') {
+                        header('Location: dashboard_admin.php');
                     } else {
-                        $error = 'El teu compte està desactivat. Contacta amb l\'administrador.';
+                        header('Location: dashboard_employee.php');
                     }
+                    exit;
                 } else {
-                    // Invalid credentials (don't reveal which part is wrong)
-                    $error = 'Email o contrasenya incorrectes.';
+                    $error = 'El teu compte està desactivat. Contacta amb l\'administrador.';
                 }
-            } catch (Exception $e) {
-                error_log('Login error: ' . $e->getMessage());
-                $error = 'Ha ocorregut un error. Si us plau, torna-ho a intentar més tard.';
+            } else {
+                // Invalid credentials (don't reveal which part is wrong)
+                $error = 'Email o contrasenya incorrectes.';
             }
+        } catch (Exception $e) {
+            error_log('Login error: ' . $e->getMessage());
+            $error = 'Ha ocorregut un error. Si us plau, torna-ho a intentar més tard.';
         }
     }
 }
