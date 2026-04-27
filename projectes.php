@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if (verifyCsrfToken($submittedToken)) {
         $projectId = filter_input(INPUT_POST, 'project_id', FILTER_VALIDATE_INT);
         if ($projectId) {
-            executeQuery("UPDATE projects SET estat = 'tancat' WHERE id = ?", [$projectId]);
+            executeQuery("UPDATE projects SET estat = 'tancat' WHERE id = :id", ['id' => $projectId]);
             setFlashMessage('success', 'Projecte tancat correctament.');
         }
     }

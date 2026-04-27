@@ -10,8 +10,8 @@
 // Database configuration
 $host = 'localhost';
 $dbname = 'stafflog_db';
-$username = 'root'; // Change this to your MySQL username
-$password = ''; // Change this to your MySQL password
+$username = 'staffuser'; // Change this to your MySQL username
+$password = 'staffpass123'; // Change this to your MySQL password
 
 try {
     // Create connection with error handling

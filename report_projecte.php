@@ -21,8 +21,8 @@ if (!$projectId) {
 // Get project details
 $project = fetchOne(
     "SELECT id, nom, client, hores_pressupostades, estat 
-     FROM projects WHERE id = ?",
-    [$projectId]
+     FROM projects WHERE id = :id",
+    ['id' => $projectId]
 );
 
 if (!$project) {
@@ -34,8 +34,8 @@ if (!$project) {
 // Get total real hours used
 $realHours = fetchOne(
     "SELECT COALESCE(SUM(hores_totals), 0) as total 
-     FROM time_entries WHERE project_id = ? AND sortida IS NOT NULL",
-    [$projectId]
+     FROM time_entries WHERE project_id = :project_id AND sortida IS NOT NULL",
+    ['project_id' => $projectId]
 );
 $realTotal = (float)($realHours['total'] ?? 0);
 $pressupostades = (float)$project['hores_pressupostades'];
@@ -46,11 +46,11 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     $employeeHours = fetchAll("
         SELECT u.nom, COALESCE(SUM(te.hores_totals), 0) as hores
         FROM users u
-        LEFT JOIN time_entries te ON u.id = te.user_id AND te.project_id = ? AND te.sortida IS NOT NULL
+        LEFT JOIN time_entries te ON u.id = te.user_id AND te.project_id = :project_id AND te.sortida IS NOT NULL
         WHERE u.rol = 'empleat'
         GROUP BY u.id, u.nom
         ORDER BY hores DESC
-    ", [$projectId]);
+    ", ['project_id' => $projectId]);
 
     // Output CSV headers
     header('Content-Type: text/csv; charset=utf-8');
@@ -82,13 +82,13 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 // Get hours per employee (for display)
 $employeeHours = fetchAll("
     SELECT u.nom, COALESCE(SUM(te.hores_totals), 0) as hores,
-           ROUND(COALESCE(SUM(te.hores_totals), 0) * 100 / NULLIF(?, 0), 1) as percentatge
+           ROUND(COALESCE(SUM(te.hores_totals), 0) * 100 / NULLIF(:realTotal, 0), 1) as percentatge
     FROM users u
-    LEFT JOIN time_entries te ON u.id = te.user_id AND te.project_id = ? AND te.sortida IS NOT NULL
+    LEFT JOIN time_entries te ON u.id = te.user_id AND te.project_id = :project_id AND te.sortida IS NOT NULL
     WHERE u.rol = 'empleat'
     GROUP BY u.id, u.nom
     ORDER BY hores DESC
-", [$realTotal, $projectId]);
+", ['realTotal' => $realTotal, 'project_id' => $projectId]);
 
 // Data for doughnut chart
 $chartPressupostades = $pressupostades;

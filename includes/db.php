@@ -11,8 +11,8 @@ define('DB_NAME', 'stafflog_db');
 define('DB_CHARSET', 'utf8mb4');
 
 // MySQL credentials (in production, consider using environment variables)
-define('DB_USERNAME', 'root');
-define('DB_PASSWORD', '');
+define('DB_USERNAME', 'staffuser');
+define('DB_PASSWORD', 'staffpass123');
 
 /**
  * Get PDO database connection

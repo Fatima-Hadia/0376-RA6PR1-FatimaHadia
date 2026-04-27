@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && in_array
         $userId = filter_input(INPUT_POST, 'user_id', FILTER_VALIDATE_INT);
         if ($userId && $userId != getCurrentUserId()) {
             $actiu = ($_POST['action'] === 'activate') ? 1 : 0;
-            executeQuery("UPDATE users SET actiu = ? WHERE id = ?", [$actiu, $userId]);
+            executeQuery("UPDATE users SET actiu = :actiu WHERE id = :id", ['actiu' => $actiu, 'id' => $userId]);
             setFlashMessage('success', $actiu ? 'Usuari activat.' : 'Usuari desactivat.');
         }
     }

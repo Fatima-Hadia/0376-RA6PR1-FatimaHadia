@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if (verifyCsrfToken($submittedToken)) {
         $alertId = filter_input(INPUT_POST, 'alert_id', FILTER_VALIDATE_INT);
         if ($alertId) {
-            executeQuery("UPDATE alerts SET llegida = 1 WHERE id = ?", [$alertId]);
+            executeQuery("UPDATE alerts SET llegida = 1 WHERE id = :id", ['id' => $alertId]);
             setFlashMessage('success', 'Alerta marcada com a llegida.');
         }
     }
