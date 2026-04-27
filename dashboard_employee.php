@@ -52,11 +52,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             );
             
             if ($entry) {
+                // Calculate hours and update
                 executeQuery(
                     "UPDATE time_entries SET sortida = NOW(), hores_totals = TIMESTAMPDIFF(MINUTE, entrada, NOW()) / 60 WHERE id = ?",
                     [$entry['id']]
                 );
                 setFlashMessage('success', 'Sortida registrada correctament.');
+                
+                // === AUTOMATIC ALERT CHECK ===
+                // Get user's contracted hours
+                $userData = fetchOne("SELECT hores_contractades FROM users WHERE id = ?", [$userId]);
+                if ($userData) {
+                    // Get total hours worked today
+                    $todayHours = fetchOne(
+                        "SELECT COALESCE(SUM(hores_totals), 0) as total FROM time_entries 
+                         WHERE user_id = ? AND DATE(entrada) = CURDATE() AND sortida IS NOT NULL",
+                        [$userId]
+                    );
+                    $totalToday = (float)($todayHours['total'] ?? 0);
+                    $contractedHours = (float)$userData['hores_contractades'];
+                    
+                    // If worked less than 90% of contracted hours, create alert
+                    if ($totalToday < ($contractedHours * 0.9)) {
+                        executeQuery(
+                            "INSERT INTO alerts (user_id, tipus, data) VALUES (?, 'sortida_aviat', CURDATE())",
+                            [$userId]
+                        );
+                    }
+                }
             } else {
                 setFlashMessage('error', 'No hi ha cap entrada pendent de sortida.');
             }
